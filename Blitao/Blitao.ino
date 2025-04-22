@@ -29,6 +29,8 @@ const int pinTX = 11;
 SoftwareSerial serial(pinRX, pinTX);
 DFRobotDFPlayerMini player;
 
+//ornaments pins
+
 void setup() {
   pinMode(motor0B, OUTPUT);
   pinMode(motor0F, OUTPUT);

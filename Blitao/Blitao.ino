@@ -5,10 +5,10 @@
 const int EN0 = 14;
 const int EN1 = 15;
 const int EN2 = 18;
-const int motor0B = 3; //PWM Pin
-const int motor0F = 2;
-const int motor1B = 9; //PWM Pin
-const int motor1F = 8;
+const int motor0B = 2;
+const int motor0F = 3; //PWM Pin
+const int motor1B = 8;
+const int motor1F = 9; //PWM Pin
 const int motor2B = 4;
 const int motor2F = 7;
 const int sawMotor = 13;
@@ -61,11 +61,15 @@ void setup() {
   bleSerial.begin(9600);
   //Iniciate DFPlayer Serial Communication and set volume
   playerSerial.begin(9600);
+  Serial.println("Iniciando modulos...");
   while(!player.begin(playerSerial)){
     Serial.println("Modulo nao disponivel");
   }
   if(player.begin(playerSerial)){
-    Serial.println("Modulo Ativo");
+    Serial.println("Modulo Player Ativo");
+  }
+  if(bleSerial.available()){
+    Serial.println("Modulo Bluethooth Ativo");
   }
   Serial.println("Iniciando Configuracao do modulo...");
   player.setTimeOut(500);
@@ -80,10 +84,10 @@ void loop() {
     switch (command){
       //Moves
       case FORWARD:
-        forwardTwoMotors(motor0B, motor0F, motor1B, motor1F);
+        forwardTwoMotors(motor0F, motor1F);
         break;
       case BACKWARD:
-        backwardTwoMotors(motor0B, motor0F, motor1B, motor1F);
+        backwardTwoMotors(motor0B, motor1B);
         break;
       case LEFT:
         turnLeft(motor0B, motor0F, motor1B, motor1F);
@@ -122,7 +126,8 @@ void backward(int pin0, int pin1){
 }
 //Makes forward more slow
 void slowSpeed(int pin0, int pin1){
-  analogWrite(pin0, 60);
+  const int speed = 60; //Motor Slow Speed
+  analogWrite(pin0, speed);
   digitalWrite(pin1, LOW);
 }
 //Turn to Left
@@ -153,7 +158,7 @@ void standing(int pin0, int pin1, int pin3, int pin4){
 void sawOn(int sawPin){
   digitalWrite(sawPin, HIGH);
 }
-void sawOff(int pisawPinn){
+void sawOff(int sawPin){
   digitalWrite(sawPin, LOW);
 }
 
@@ -162,7 +167,7 @@ void attack(int sawPin, int pin0, int pin1){
   sawOn(sawPin);
   forward(pin0, pin1);
 }
-void backAttack(int sawPin, int pin0, intpin1){
+void backAttack(int sawPin, int pin0, int pin1){
   sawOff(sawPin);
   backward(pin0, pin1);
 }
@@ -174,7 +179,7 @@ void playFistSound(){
 }
 void playSecondSound(int leftEye, int rightEye){
   player.play(2);
-  blinkEye(leftEye, rightEye),
+  blinkEye(leftEye, rightEye);
 }
 void blinkEye(int leftEye, int rightEye){
   digitalWrite(leftEye, LOW);

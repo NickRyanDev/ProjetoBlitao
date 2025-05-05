@@ -1,16 +1,17 @@
 //include Libraries
 #include "DFRobotDFPlayerMini.h"
 #include <SoftwareSerial.h>
-//Shield Pins
-const int EN0 = 18;
-const int EN1 = 19;
-const int motor0B = 7;
-const int motor0F = 8;
-const int motor1B = 12;
-const int motor1F = 13;
-const int motor2B = 14;
-const int motor2F = 15;
-const int sawMotor = 16;
+//L293D pins
+const int EN0 = 14;
+const int EN1 = 15;
+const int EN2 = 18;
+const int motor0B = 3; //PWM Pin
+const int motor0F = 2;
+const int motor1B = 9; //PWM Pin
+const int motor1F = 8;
+const int motor2B = 4;
+const int motor2F = 7;
+const int sawMotor = 13;
 //Bluethooth Control
 char command;
 #define FORWARD 'F'
@@ -22,16 +23,23 @@ char command;
 #define CROSS 'X'
 #define TRIANGLE 'T'
 #define SQUARE 'S'
-//Player Pins
-const int pinRX = 10;
-const int pinTX = 11;
+//Serial Communication Pins
+const int playerPinRX = 10;
+const int playerPinTX = 11;
+const int blePinRX = 5;
+const int blePinTX = 6;
+//Instance Serial Variables
+SoftwareSerial playerSerial(playerPinRX, playerPinTX);
+SoftwareSerial bleSerial(blePinRX, blePinTX);
 //Instance Player Variables
-SoftwareSerial serial(pinRX, pinTX);
 DFRobotDFPlayerMini player;
 
-//ornaments pins
+//Ornaments pins
+const int leftEye = 16;
+const int rightEye = 17;
 
 void setup() {
+  //Set Motors Pins
   pinMode(motor0B, OUTPUT);
   pinMode(motor0F, OUTPUT);
   pinMode(motor1B, OUTPUT);
@@ -39,14 +47,31 @@ void setup() {
   pinMode(motor2B, OUTPUT);
   pinMode(motor2F, OUTPUT);
   pinMode(sawMotor, OUTPUT);
-  //Iniciate motors
+  //Set Enable Pins
   digitalWrite(EN0, OUTPUT);
   digitalWrite(EN1, OUTPUT);
+  digitalWrite(EN2, OUTPUT);
+  //Iniciate motors
+  digitalWrite(EN0, HIGH);
+  digitalWrite(EN1, HIGH);
+  digitalWrite(EN2, HIGH);
+  //Iniciate Serial Communication
+  Serial.begin(2000000);
   //Iniciate Bluethooth Serial Communication
-  Serial.begin(9600);
+  bleSerial.begin(9600);
   //Iniciate DFPlayer Serial Communication and set volume
-  serial.begin(9600);
+  playerSerial.begin(9600);
+  while(!player.begin(playerSerial)){
+    Serial.println("Modulo nao disponivel");
+  }
+  if(player.begin(playerSerial)){
+    Serial.println("Modulo Ativo");
+  }
+  Serial.println("Iniciando Configuracao do modulo...");
+  player.setTimeOut(500);
   player.volume(28);
+  player.EQ(0);
+  Serial.println("Configuracao finalizada");
 }
 
 void loop() {
@@ -95,15 +120,20 @@ void backward(int pin0, int pin1){
   digitalWrite(pin0, LOW);
   digitalWrite(pin1, HIGH);
 }
+//Makes forward more slow
+void slowSpeed(int pin0, int pin1){
+  analogWrite(pin0, 60);
+  digitalWrite(pin1, LOW);
+}
 //Turn to Left
 void turnLeft(int pin0, int pin1, int pin3, int pin4){
-  backward(pin0, pin1);
+  slowSpeed(pin0, pin1);
   forward(pin3, pin4);
 }
 //Turn to Right
 void turnRight(int pin0, int pin1, int pin3, int pin4){
   forward(pin0, pin1);
-  backward(pin3, pin4);
+  slowSpeed(pin3, pin4);
 }
 void forwardTwoMotors(int pin0, int pin3){
   digitalWrite(pin0, HIGH);
@@ -135,4 +165,30 @@ void attack(int sawPin, int pin0, int pin1){
 void backAttack(int sawPin, int pin0, intpin1){
   sawOff(sawPin);
   backward(pin0, pin1);
+}
+
+//Ornaments functions
+void playFistSound(){
+  player.play(1);
+  delay(2000);
+}
+void playSecondSound(int leftEye, int rightEye){
+  player.play(2);
+  blinkEye(leftEye, rightEye),
+}
+void blinkEye(int leftEye, int rightEye){
+  digitalWrite(leftEye, LOW);
+  delay(500);
+  digitalWrite(leftEye, HIGH);
+  delay(250);
+  digitalWrite(rightEye, LOW);
+  delay(250);
+  digitalWrite(rightEye, HIGH);
+  delay(250);
+  digitalWrite(rightEye, LOW);
+  digitalWrite(leftEye, LOW);
+  delay(250);
+  digitalWrite(rightEye, HIGH);
+  digitalWrite(leftEye, HIGH);
+  delay(500);
 }

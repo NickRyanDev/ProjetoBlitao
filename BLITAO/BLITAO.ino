@@ -25,10 +25,12 @@ void setup() {
   pinMode(LED2, OUTPUT);
 
   BLE.begin(19200);
+  Serial.begin(250000);
 }
 
 void loop() {
-  if(BLE.available()<0){
+  if(BLE.available()>0){
+    Serial.println("conectado");
     command = BLE.read();
     switch(command){
       case 'F':

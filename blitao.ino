@@ -60,6 +60,12 @@ void loop() {
       case 'C':
         blinkLed();
         break;
+      case 'T':
+        singleBlink();
+        break;
+      case 'S':
+        powerForward();
+        break;
       default:
         digitalWrite(MOTOR1F, LOW);
         digitalWrite(MOTOR1B, LOW);
@@ -100,11 +106,23 @@ void left(){
   analogWrite(MOTOR2B, lowSpeed);
 }
 
+void powerForward(){
+  analogWrite(MOTOR1F, highSpeed);
+  analogWrite(MOTOR1B, stopped);
+  analogWrite(MOTOR2F, highSpeed);
+  analogWrite(MOTOR2B, stopped);
+}
+
 void blinkLed(){
   digitalWrite(LED1, LOW);
   digitalWrite(LED2, LOW);
   delay(200);
   digitalWrite(LED1, HIGH);
+  digitalWrite(LED2, HIGH);
+}
+void singleBlink(){
+  digitalWrite(LED2, HIGH);
+  delay(200);
   digitalWrite(LED2, HIGH);
 }
 
